@@ -2,9 +2,14 @@ package MachineLearning;
 
 public class TrainingSet {
 	int RecordCount;
-	int[][] Records;
+	public int NoInputs;
+	public int NoOutputs;
+	
+	float[][] InputRecords;
+	float[][] OutputRecords;
 
 	TrainingSet(String fileName) {
 
 	}
+	
 }
