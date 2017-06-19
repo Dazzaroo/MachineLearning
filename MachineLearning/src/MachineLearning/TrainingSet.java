@@ -5,8 +5,8 @@ public class TrainingSet {
 	public int NoInputs;
 	public int NoOutputs;
 	
-	double[][] InputRecords;
-	double[][] OutputRecords;
+	public double[][] InputRecords;
+	public double[][] OutputRecords;
 
 	TrainingSet(int NoInputs, int NoOutputs, int RecordCount) {
 	   this.NoInputs = NoInputs;

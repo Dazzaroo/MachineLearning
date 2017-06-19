@@ -5,7 +5,8 @@ public class FeedForwardNet {
 	int NoHiddens;
 	int NoOutputs;
 	
-	double MAX_INIT_WEIGHT;
+	double MAX_INIT_WEIGHT = 0.1;
+	double OUTPUT_TOLERANCE = 0.1;
 	
 	double InputHiddenWeights[][];
 	double HiddenBias[];
@@ -14,8 +15,11 @@ public class FeedForwardNet {
 	double InputActivation[];
 	double OutputActivation[];
 	double HiddenActivation[];
+	double OutputDelta[];
+	double HiddenDSum[];
+	double HiddenDelta[];
 	
-	double n = 0.1;
+	double N = 0.1;
 	
 	FeedForwardNet(int noInputs, int noOutputs, int noHiddens) {
 		NoHiddens = noHiddens;
@@ -31,32 +35,55 @@ public class FeedForwardNet {
 		InputActivation = new double[NoInputs];
 		OutputActivation = new double[NoOutputs];
 		HiddenActivation = new double[NoHiddens];
+		
+		OutputDelta = new double[NoOutputs];
+		HiddenDSum = new double[NoHiddens];
+		HiddenDelta = new double[NoHiddens];
+		
+		Randomize();
 	}
 	
 	double Squash(double value) {
 		return (1/ ( 1 + Math.exp(-value)));
 	}
 	
-	void ForwardPassTrain(double[] input, double[] output) {
-		double delta;
-		ForwardPass(input);
+	ErrorMeasure ForwardPassTrain(double[] input, double[] output) {
+
+		ErrorMeasure errorMeasure;
+		errorMeasure = ForwardPass(input, output);
 		
-		for (int i=0; i<NoInputs; i++) {
-			delta = (output[i] - OutputActivation[i] )  * OutputActivation[i] * ( 1 - OutputActivation[i]);
-			for (int j=0; j < NoHiddens; j++) {
-				HiddenOutputWeights[j][i] += n * HiddenOutputWeights[j][i] * delta;
-			}
-			OutputBias[i] += n * OutputBias[i] * delta;
+		/* Calculate Output/Hidden deltas */
+		for (int i=0; i<NoOutputs; i++) {
+			OutputDelta[i] = (output[i] - OutputActivation[i] )  * OutputActivation[i] * ( 1 - OutputActivation[i]);
 		}
+			
+		for (int j=0; j < NoHiddens; j++) {
+			HiddenDSum[j] = 0.0;
+			for (int i=0; i<NoOutputs; i++) {
+				HiddenDSum[j] += OutputDelta[i] * HiddenOutputWeights[j][i];
+			
+			}
+			HiddenDelta[j] = HiddenActivation[j] * ( 1 - HiddenActivation[j]) * HiddenDSum[j] ;
+		}
+			
+		/* Train Weights */
+		for (int i=0; i<NoOutputs; i++) {
+			for (int j=0; j <NoHiddens; j++) {
+				HiddenOutputWeights[j][i] += N * HiddenOutputWeights[j][i] * OutputDelta[i];
+			}
+			OutputBias[i] += N * OutputBias[i] * OutputDelta[i];
+		}
+		
 		for (int i=0; i <NoHiddens; i++) {
 			for (int j=0; j < NoInputs; j++) {
-				//delta = 
+				InputHiddenWeights[j][i] += N * InputHiddenWeights[j][i] * HiddenDelta[i];
 			}
+			HiddenBias[i] += N * HiddenBias[i] * HiddenDelta[i];
 		}
-		
+		return (errorMeasure);
 	}
 	
-	void ForwardPass(double[] input) {
+	ErrorMeasure ForwardPass(double[] input, double[] output) {
 	
 		SetInputActivation(input);
 		
@@ -79,14 +106,24 @@ public class FeedForwardNet {
 			weightSum += OutputBias[i];
 			OutputActivation[i] = Squash(weightSum);
 		}
+		return ForwardPassError(input, output);
 	}
 	
-	boolean ForwardPassError(double[] input, double[] output, out error) {
-	    double error = 0.0;
-		ForwardPass(input);
+	ErrorMeasure ForwardPassError(double[] input, double[] output) {
+	    ErrorMeasure errorMeasure;
+		double sumError = 0.0;
+	    double localError;
+	    boolean hasLearned = true;
+	
 	    for (int i=0; i< NoOutputs; i++) {
-	    	
+	    	localError = Math.abs(output[i] - OutputActivation[i]);
+	    	if (localError > OUTPUT_TOLERANCE)
+	    		hasLearned = false;
+	    	sumError += localError;
 	    }
+	    errorMeasure = new ErrorMeasure(hasLearned, sumError);
+	    return(errorMeasure);
+	    
 	}
 	
 	void SetInputActivation(double[] input) {

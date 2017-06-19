@@ -64,6 +64,12 @@ public class UnitTestGUI {
 		menuBar.add(mnAlgorithms);
 		
 		JMenuItem mntmBackProp = new JMenuItem("Back Propagation");
+		mntmBackProp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				BackPropTest test = new BackPropTest();
+				test.RunTest();
+			}
+		});
 		mnAlgorithms.add(mntmBackProp);
 		
 		JMenuItem mntmLSTM = new JMenuItem("LSTM");
