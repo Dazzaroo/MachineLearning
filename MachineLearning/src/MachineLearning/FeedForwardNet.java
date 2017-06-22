@@ -5,8 +5,9 @@ public class FeedForwardNet {
 	int NoHiddens;
 	int NoOutputs;
 	
-	double MAX_INIT_WEIGHT = 0.1;
+	double MAX_INIT_WEIGHT = 0.5;
 	double OUTPUT_TOLERANCE = 0.1;
+	double MOMENTUM = 0.9;
 	
 	double InputHiddenWeights[][];
 	double HiddenBias[];
@@ -18,8 +19,12 @@ public class FeedForwardNet {
 	double OutputDelta[];
 	double HiddenDSum[];
 	double HiddenDelta[];
+	double InputHiddenWeightsChange[][];
+	double HiddenOutputWeightsChange[][];
+	double OutputBiasChange[];
+	double HiddenBiasChange[];
 	
-	double N = 0.1;
+	double N = 0.25;
 	
 	FeedForwardNet(int noInputs, int noOutputs, int noHiddens) {
 		NoHiddens = noHiddens;
@@ -39,6 +44,12 @@ public class FeedForwardNet {
 		OutputDelta = new double[NoOutputs];
 		HiddenDSum = new double[NoHiddens];
 		HiddenDelta = new double[NoHiddens];
+		
+		InputHiddenWeightsChange = new double[NoInputs][NoHiddens];
+		HiddenOutputWeightsChange = new double[NoHiddens][NoOutputs];
+		
+		OutputBiasChange = new double[NoOutputs];
+		HiddenBiasChange = new double[NoHiddens];
 		
 		Randomize();
 	}
@@ -69,16 +80,20 @@ public class FeedForwardNet {
 		/* Train Weights */
 		for (int i=0; i<NoOutputs; i++) {
 			for (int j=0; j <NoHiddens; j++) {
-				HiddenOutputWeights[j][i] += N * HiddenOutputWeights[j][i] * OutputDelta[i];
+				HiddenOutputWeightsChange[j][i] = N * HiddenActivation[j] * OutputDelta[i] + HiddenOutputWeightsChange[j][i] * MOMENTUM;
+				HiddenOutputWeights[j][i] += HiddenOutputWeightsChange[j][i];
 			}
-			OutputBias[i] += N * OutputBias[i] * OutputDelta[i];
+			OutputBiasChange[i] = N * OutputDelta[i] + OutputBiasChange[i] * MOMENTUM;
+			OutputBias[i] +=OutputBiasChange[i];
 		}
 		
 		for (int i=0; i <NoHiddens; i++) {
 			for (int j=0; j < NoInputs; j++) {
-				InputHiddenWeights[j][i] += N * InputHiddenWeights[j][i] * HiddenDelta[i];
+				InputHiddenWeightsChange[j][i] = N * InputActivation[j] * HiddenDelta[i] + InputHiddenWeightsChange[j][i] * MOMENTUM;
+				InputHiddenWeights[j][i] += InputHiddenWeightsChange[j][i];
 			}
-			HiddenBias[i] += N * HiddenBias[i] * HiddenDelta[i];
+			HiddenBiasChange[i] = N  * HiddenDelta[i];
+			HiddenBias[i] += HiddenBiasChange[i];
 		}
 		return (errorMeasure);
 	}
@@ -126,6 +141,33 @@ public class FeedForwardNet {
 	    
 	}
 	
+	void ShowActivations() {
+		for (int i=0; i< NoInputs; i++) {
+			System.out.print(InputActivation[i] + " ");
+		}
+		System.out.print(" = ");
+		for (int i=0; i< NoOutputs; i++) {
+			System.out.print(OutputActivation[i] + " ");
+		}
+		System.out.println("");
+	}
+	
+	void ShowWeights() {
+		for (int j=0; j<NoHiddens; j++) {
+		   System.out.print("H"+j+":");
+		   for (int i=0; i< NoInputs; i++) {
+			 System.out.print("I"+i+":"+InputHiddenWeights[i][j]+" ");
+		   }
+		   System.out.println("BH:"+HiddenBias[j]);
+		}
+		for (int j=0; j<NoOutputs; j++) {
+			   System.out.print("O"+j+":");
+			   for (int i=0; i< NoHiddens; i++) {
+				 System.out.print("H"+i+":"+HiddenOutputWeights[i][j]+" ");
+			   }
+			   System.out.println("BO:"+OutputBias[j]);
+		}
+	}
 	void SetInputActivation(double[] input) {
 		for (int i=0; i< NoInputs; i++) {
 			  InputActivation[i] = input[i];
