@@ -1,10 +1,12 @@
-package MachineLearning;
+package MachineLearning.BackPropagation;
+
+import MachineLearning.DataSet.*;
 
 public class FeedForwardNetTrainer {
 	FeedForwardNet FFN;
 	TrainingSet ts;
 	
-	FeedForwardNetTrainer(TrainingSet ts, int noHiddens) {
+	public FeedForwardNetTrainer(TrainingSet ts, int noHiddens) {
 		FFN = new FeedForwardNet(ts.NoInputs, ts.NoOutputs, noHiddens);
 		this.ts = ts;
 	}

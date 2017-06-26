@@ -1,4 +1,4 @@
-package MachineLearning;
+package MachineLearning.BackPropagation;
 
 public class FeedForwardNet {
 	int NoInputs;
@@ -26,7 +26,7 @@ public class FeedForwardNet {
 	
 	double N = 0.25;
 	
-	FeedForwardNet(int noInputs, int noOutputs, int noHiddens) {
+	public FeedForwardNet(int noInputs, int noOutputs, int noHiddens) {
 		NoHiddens = noHiddens;
 		this.NoInputs = noInputs;
 		this.NoOutputs = noOutputs;

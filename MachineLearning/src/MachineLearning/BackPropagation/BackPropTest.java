@@ -1,10 +1,12 @@
-package MachineLearning;
+package MachineLearning.BackPropagation;
+
+import MachineLearning.DataSet.*;
 
 public class BackPropTest {
-   BackPropTest() {
+   public BackPropTest() {
 	   
    }
-   void RunTest() {
+   public void RunTest() {
 	   TrainingSet ts = new TrainingSet(2, 1, 4);
 	   ts.InputRecords[0][0] = 0.0;
 	   ts.InputRecords[0][1] = 1.0;
